@@ -45,7 +45,7 @@ mail 及簡訊功能尚未完整測試，不需要可自行移除
 	接續剛剛 Line Secret 頁面 > 選擇 Messaging API 分頁 > 最下方 Channel access token -> 點選 Issue
 	生成 LINE_CHANNEL_ACCESS_TOKEN，替換設定檔中的 {YOUR_LINE_CHANNEL_TOKEN}
 
-####3. 專案啟動
+#### 3. 專案啟動
 
 **_以下說明為使用 Terminal 之教學，熟悉 IDE 者也可直接使用 IDE 執行_**
 
