@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- Inherit defaults from Spring Boot -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.12</version>
+        <relativePath/>
+    </parent>
+    <groupId>tw.hyin.demo</groupId>
+    <artifactId>message-service</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>message-service</name>
+    <description>Service for sending message (including mail, phone message, app push, gpt, line, etc.)</description>
+
+    <repositories>
+        <repository>
+            <id>mvn-repo</id>
+            <url>https://raw.github.com/JHying/mvn-repo/main</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <!-- Maven 控制 Spring Profile -->
+    <profiles>
+        <profile>
+            <!-- 測試環境 -->
+            <id>dev</id>
+            <properties>
+                <profileActive>dev</profileActive>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <!-- 正式環境 -->
+            <id>prod</id>
+            <properties>
+                <profileActive>prod</profileActive>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <!-- let’s modify the final WAR file name to avoid including version numbers -->
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>env/**</exclude>
+                </excludes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources/env/${profileActive}</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- collect all jar files and create a single executable jar -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <fork>false</fork>
+                    <includeSystemScope>true</includeSystemScope>
+                    <sourceDirectory>${pom.basedir}/src/main/java</sourceDirectory>
+                </configuration>
+            </plugin>
+            <!--Failed to execute goal org.apache.maven.plugins:maven-resources-plugin:3.2.0:resources (default-resources) on project subsys-back: Input length = 1-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <!--讓 maven 打包 excel 時不編譯mail模板-->
+                        <nonFilteredFileExtension>ftlh</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <java.version>11</java.version>
+        <line.bot.version>5.0.3</line.bot.version>
+        <!--analysis with sonar-->
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        <!--		<spring-cloud.version>2021.0.4</spring-cloud.version>-->
+    </properties>
+
+    <!-- 微服務相關 -->
+    <!--	<dependencyManagement>-->
+    <!--		<dependencies>-->
+    <!--			<dependency>-->
+    <!--				<groupId>org.springframework.cloud</groupId>-->
+    <!--				<artifactId>spring-cloud-dependencies</artifactId>-->
+    <!--				<version>${spring-cloud.version}</version>-->
+    <!--				<type>pom</type>-->
+    <!--				<scope>import</scope>-->
+    <!--			</dependency>-->
+    <!--		</dependencies>-->
+    <!--	</dependencyManagement>-->
+
+    <dependencies>
+
+        <!-- 微服務相關 -->
+        <!--		<dependency>-->
+        <!--			<groupId>org.springframework.cloud</groupId>-->
+        <!--			<artifactId>spring-cloud-starter-bootstrap</artifactId>-->
+        <!--		</dependency>-->
+        <!--		<dependency>-->
+        <!--			<groupId>org.springframework.cloud</groupId>-->
+        <!--			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>-->
+        <!--		</dependency>-->
+        <!--		&lt;!&ndash;Spring Cloud LoadBalancer is currently working with the default cache.&ndash;&gt;-->
+        <!--		<dependency>-->
+        <!--			<groupId>com.github.ben-manes.caffeine</groupId>-->
+        <!--			<artifactId>caffeine</artifactId>-->
+        <!--		</dependency>-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- Unable to create a Configuration, because no Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- 處理 Java 基本物件方法的 Apache 工具類包 -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-collections/commons-collections -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+
+        <!-- Spring retry -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+
+        <!-- JUnit, spring Boot 2.2.0 後使用 JUnit 5 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- spring 默認使用yml配置，若要用xml或properties，需使用configuration-processor -->
+        <!-- e.g. @PropertySource("classpath:your.properties") -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+
+        <!--lombok 提供 @Data，無須寫 getter、setter、constructor -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <!--FreeMarker 是一個 template engine，可以用來建立 email 內容的模板-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+
+        <!-- shared-utils -->
+        <dependency>
+            <groupId>tw.hyin.java</groupId>
+            <artifactId>hyin-shared-utils</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+
+        <!-- line -->
+        <dependency>
+            <groupId>com.linecorp.bot</groupId>
+            <artifactId>line-bot-spring-boot</artifactId>
+            <version>${line.bot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.linecorp.bot</groupId>
+            <artifactId>line-bot-servlet</artifactId>
+            <version>${line.bot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.linecorp.bot</groupId>
+            <artifactId>line-bot-model</artifactId>
+            <version>${line.bot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.linecorp.bot</groupId>
+            <artifactId>line-bot-parser</artifactId>
+            <version>${line.bot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.linecorp.bot</groupId>
+            <artifactId>line-bot-api-client</artifactId>
+            <version>${line.bot.version}</version>
+        </dependency>
+
+    </dependencies>
+</project>

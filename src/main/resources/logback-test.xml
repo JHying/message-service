@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 級別: All < Trace < Debug < Info < Warn < Error < Fatal < OFF status -->
+<Configuration>
+
+	<!-- 日誌檔案目錄和壓縮檔案目錄配置 -->
+	<Property name="fileName" value="message-service" />
+	<!-- 配置日誌檔輸出目錄，此配置將日誌輸出到tomcat根目錄下的指定資料夾 -->
+	<Property name="log-path" value="logs/${fileName}" />
+	<Property name="log-level" value="debug" />
+	<!-- 保留日誌的天數 -->
+	<Property name="MaxBackupDate" value="10" />
+	<property name="CONSOLE_PATTERN"
+		value="[%d{yyyy-MM-dd HH:mm:ss.SSS,GMT+8}] %-5level [%t] [%logger{0}.%M\\(%F:%L\\)] - %msg%n" />
+
+	<!-- 控制檯日誌的配置 -->
+	<appender name="console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder charset="UTF-8">
+			<pattern>${CONSOLE_PATTERN}</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>WARN</level>
+		</filter>
+	</appender>
+
+	<!-- info -->
+	<appender name="infoFile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender" immediateFlush="true">
+		<file>${log-path}/${fileName}-INFO.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log-path}/info/${fileName}-INFO_%d{yyyyMMdd}.log.gz
+			</fileNamePattern>
+			<maxHistory>${MaxBackupDate}</maxHistory>
+		</rollingPolicy>
+		<encoder charset="UTF-8">
+			<pattern>${CONSOLE_PATTERN}</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+
+	<!-- error -->
+	<appender name="errorFile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender" immediateFlush="true">
+		<file>${log-path}/${fileName}-ERROR.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log-path}/error/${fileName}-ERROR_%d{yyyyMMdd}.log.gz
+			</fileNamePattern>
+			<maxHistory>${MaxBackupDate}</maxHistory>
+		</rollingPolicy>
+		<encoder charset="UTF-8">
+			<pattern>${CONSOLE_PATTERN}</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+
+	<!--定義logger，只有定義logger引入appender，appender才會生效 -->
+	<root level="INFO">
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFile" />
+		<appender-ref ref="errorFile" />
+	</root>
+
+</Configuration>
