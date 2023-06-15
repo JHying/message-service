@@ -1,5 +1,8 @@
 ## Message service
 
+<a href="https://github.com/JHying/message-service/blob/master/LICENSE">![License: MIT](https://img.shields.io/badge/License-MIT-orange)</a>
+<a href="https://github.com/JHying/message-service/releases/tag/1.0.0">![Release: 1.0.0](https://img.shields.io/badge/Release-1.0.0-blue)</a>
+
 ### 最後更新：2022.06.15
 
 整合 line-bot 及 chatGPT (使用 text-davinci-003)  
